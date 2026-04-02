@@ -36,7 +36,7 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
 };
 
 export default function CreateSandbox() {
@@ -142,7 +142,7 @@ export default function CreateSandbox() {
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: 'easeOut' as const }}
       >
         <Box sx={{ mb: 4 }}>
           <Typography variant="h3" sx={{ fontWeight: 700 }}>
