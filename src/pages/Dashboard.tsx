@@ -27,7 +27,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const MotionCard = motion.create(Card);
+const MotionCard = motion(Card);
 
 const containerVariants = {
   hidden: {},
