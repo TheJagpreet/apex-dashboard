@@ -1,31 +1,30 @@
 import { createTheme, alpha } from '@mui/material/styles';
 
-const GOLD = '#ECD06F';
-const BLACK = '#000000';
+const LIME = '#C8E64A';
+const DARK_BG = '#1A1A1A';
+const CARD_BG = '#242424';
+const CARD_BORDER = '#2E2E2E';
 const WHITE = '#FFFFFF';
-const DARK_SURFACE = '#0A0A0A';
-const DARK_CARD = '#141414';
-const DARK_BORDER = '#1E1E1E';
 const GRAY_TEXT = '#9E9E9E';
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: GOLD,
-      light: '#F2E0A0',
-      dark: '#C9AD4A',
-      contrastText: BLACK,
+      main: LIME,
+      light: '#D9F07A',
+      dark: '#A8C230',
+      contrastText: '#000000',
     },
     secondary: {
-      main: '#2A2A2A',
+      main: '#2E2E2E',
       light: '#3A3A3A',
-      dark: '#1A1A1A',
+      dark: '#1E1E1E',
       contrastText: WHITE,
     },
     background: {
-      default: BLACK,
-      paper: DARK_CARD,
+      default: DARK_BG,
+      paper: CARD_BG,
     },
     text: {
       primary: WHITE,
@@ -40,14 +39,14 @@ const theme = createTheme({
       dark: '#DC2626',
     },
     warning: {
-      main: GOLD,
-      dark: '#C9AD4A',
+      main: '#F59E0B',
+      dark: '#D97706',
     },
     info: {
       main: '#60A5FA',
       dark: '#3B82F6',
     },
-    divider: DARK_BORDER,
+    divider: CARD_BORDER,
   },
   typography: {
     fontFamily: '"DM Sans", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -104,15 +103,15 @@ const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 20,
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: BLACK,
+          backgroundColor: DARK_BG,
           scrollbarWidth: 'thin',
-          scrollbarColor: `${DARK_BORDER} transparent`,
+          scrollbarColor: `${CARD_BORDER} transparent`,
           '&::-webkit-scrollbar': {
             width: '6px',
           },
@@ -120,7 +119,7 @@ const theme = createTheme({
             background: 'transparent',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: DARK_BORDER,
+            background: CARD_BORDER,
             borderRadius: '3px',
           },
         },
@@ -129,7 +128,7 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 14,
           textTransform: 'none' as const,
           padding: '10px 24px',
           fontSize: '0.9rem',
@@ -140,19 +139,19 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          background: GOLD,
-          color: BLACK,
+          background: LIME,
+          color: '#000',
           '&:hover': {
-            background: '#F2E0A0',
-            boxShadow: `0 0 20px ${alpha(GOLD, 0.4)}`,
+            background: '#D9F07A',
+            boxShadow: `0 0 20px ${alpha(LIME, 0.35)}`,
           },
         },
         outlinedPrimary: {
-          borderColor: alpha(GOLD, 0.4),
-          color: GOLD,
+          borderColor: alpha(LIME, 0.4),
+          color: LIME,
           '&:hover': {
-            borderColor: GOLD,
-            background: alpha(GOLD, 0.08),
+            borderColor: LIME,
+            background: alpha(LIME, 0.08),
           },
         },
         text: {
@@ -165,14 +164,14 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          background: DARK_CARD,
-          border: `1px solid ${DARK_BORDER}`,
-          borderRadius: 20,
+          background: CARD_BG,
+          border: `1px solid ${CARD_BORDER}`,
+          borderRadius: 24,
           boxShadow: 'none',
           transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
           '&:hover': {
-            borderColor: alpha(GOLD, 0.2),
-            boxShadow: `0 0 30px ${alpha(GOLD, 0.05)}`,
+            borderColor: alpha(LIME, 0.15),
+            boxShadow: `0 0 30px ${alpha(LIME, 0.04)}`,
           },
         },
       },
@@ -180,7 +179,7 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: 10,
           fontWeight: 500,
           fontSize: '0.75rem',
         },
@@ -193,23 +192,23 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 12,
+            borderRadius: 14,
             background: alpha(WHITE, 0.03),
             '& fieldset': {
-              borderColor: DARK_BORDER,
+              borderColor: CARD_BORDER,
             },
             '&:hover fieldset': {
-              borderColor: alpha(GOLD, 0.3),
+              borderColor: alpha(LIME, 0.3),
             },
             '&.Mui-focused fieldset': {
-              borderColor: GOLD,
+              borderColor: LIME,
               borderWidth: '1px',
             },
           },
           '& .MuiInputLabel-root': {
             color: GRAY_TEXT,
             '&.Mui-focused': {
-              color: GOLD,
+              color: LIME,
             },
           },
         },
@@ -218,27 +217,27 @@ const theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          background: DARK_SURFACE,
-          border: `1px solid ${DARK_BORDER}`,
-          borderRadius: 24,
-          boxShadow: `0 25px 80px ${alpha(BLACK, 0.8)}`,
+          background: CARD_BG,
+          border: `1px solid ${CARD_BORDER}`,
+          borderRadius: 28,
+          boxShadow: `0 25px 80px ${alpha('#000000', 0.8)}`,
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: DARK_SURFACE,
-          borderRight: `1px solid ${DARK_BORDER}`,
+          background: DARK_BG,
+          borderRight: `1px solid ${CARD_BORDER}`,
         },
       },
     },
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          background: DARK_CARD,
-          border: `1px solid ${DARK_BORDER}`,
-          borderRadius: 8,
+          background: CARD_BG,
+          border: `1px solid ${CARD_BORDER}`,
+          borderRadius: 10,
           fontSize: '0.8rem',
           padding: '8px 12px',
         },
@@ -247,7 +246,7 @@ const theme = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 14,
           '&:hover': {
             background: alpha(WHITE, 0.05),
           },
@@ -257,20 +256,20 @@ const theme = createTheme({
     MuiLinearProgress: {
       styleOverrides: {
         root: {
-          borderRadius: 4,
-          height: 4,
-          backgroundColor: DARK_BORDER,
+          borderRadius: 6,
+          height: 6,
+          backgroundColor: alpha(WHITE, 0.08),
         },
         barColorPrimary: {
-          background: `linear-gradient(90deg, ${GOLD}, #F2E0A0)`,
-          borderRadius: 4,
+          background: `linear-gradient(90deg, ${LIME}, #D9F07A)`,
+          borderRadius: 6,
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
         root: {
-          borderColor: DARK_BORDER,
+          borderColor: CARD_BORDER,
         },
         head: {
           fontWeight: 600,
@@ -284,7 +283,7 @@ const theme = createTheme({
     MuiAlert: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 14,
         },
       },
     },

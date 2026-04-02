@@ -28,19 +28,20 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '../hooks/useToast';
 
 const MotionCard = motion(Card);
 
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.06 },
   },
 } as const;
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' as const } },
   exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
 };
 
@@ -57,11 +58,12 @@ function getStatusColor(status: string) {
   }
 }
 
-const GOLD = '#ECD06F';
+const LIME = '#C8E64A';
 
 export default function Sandboxes() {
   const { sandboxes, loading, refetch } = useSandboxes();
   const navigate = useNavigate();
+  const { showError } = useToast();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -87,11 +89,15 @@ export default function Sandboxes() {
     try {
       await destroySandbox(destroyTarget.id);
       await refetch();
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to destroy sandbox';
+      showError(message);
     } finally {
       setDestroying(false);
       setDestroyTarget(null);
     }
-  }, [destroyTarget, refetch]);
+  }, [destroyTarget, refetch, showError]);
 
   const statusFilters: { label: string; value: StatusFilter }[] = [
     { label: 'All', value: 'all' },
@@ -113,7 +119,10 @@ export default function Sandboxes() {
         }}
       >
         <Box>
-          <Typography variant="h3" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h3"
+            sx={{ fontWeight: 700, fontSize: { xs: '1.8rem', md: '2.2rem' } }}
+          >
             Sandboxes
           </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary', mt: 0.5 }}>
@@ -124,7 +133,7 @@ export default function Sandboxes() {
           variant="contained"
           startIcon={<AddRounded />}
           onClick={() => navigate('/create')}
-          sx={{ flexShrink: 0 }}
+          sx={{ flexShrink: 0, borderRadius: '14px' }}
         >
           Create Sandbox
         </Button>
@@ -165,15 +174,16 @@ export default function Sandboxes() {
               onClick={() => setStatusFilter(f.value)}
               sx={{
                 fontWeight: 600,
+                borderRadius: '10px',
                 bgcolor:
-                  statusFilter === f.value ? alpha(GOLD, 0.15) : alpha('#FFFFFF', 0.04),
-                color: statusFilter === f.value ? GOLD : 'text.secondary',
+                  statusFilter === f.value ? alpha(LIME, 0.15) : alpha('#FFFFFF', 0.04),
+                color: statusFilter === f.value ? LIME : 'text.secondary',
                 border: '1px solid',
                 borderColor:
-                  statusFilter === f.value ? alpha(GOLD, 0.3) : alpha('#FFFFFF', 0.08),
+                  statusFilter === f.value ? alpha(LIME, 0.3) : alpha('#FFFFFF', 0.08),
                 '&:hover': {
                   bgcolor:
-                    statusFilter === f.value ? alpha(GOLD, 0.2) : alpha('#FFFFFF', 0.08),
+                    statusFilter === f.value ? alpha(LIME, 0.2) : alpha('#FFFFFF', 0.08),
                 },
               }}
             />
@@ -183,22 +193,21 @@ export default function Sandboxes() {
 
       {/* Content */}
       {loading ? (
-        // Loading skeletons
-        <Grid container spacing={3}>
+        <Grid container spacing={2.5}>
           {[...Array(6)].map((_, i) => (
             <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={i}>
-              <Card>
+              <Card sx={{ borderRadius: '24px' }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Skeleton width={140} height={24} />
+                    <Skeleton width={140} height={24} sx={{ borderRadius: '8px' }} />
                     <Skeleton variant="circular" width={12} height={12} />
                   </Box>
-                  <Skeleton width="80%" height={20} sx={{ mb: 1 }} />
-                  <Skeleton width={100} height={18} sx={{ mb: 2 }} />
-                  <Skeleton width={70} height={28} sx={{ mb: 2 }} />
+                  <Skeleton width="80%" height={20} sx={{ mb: 1, borderRadius: '6px' }} />
+                  <Skeleton width={100} height={18} sx={{ mb: 2, borderRadius: '6px' }} />
+                  <Skeleton width={70} height={28} sx={{ mb: 2, borderRadius: '8px' }} />
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Skeleton width={90} height={36} />
-                    <Skeleton width={80} height={36} />
+                    <Skeleton width={90} height={36} sx={{ borderRadius: '10px' }} />
+                    <Skeleton width={80} height={36} sx={{ borderRadius: '10px' }} />
                   </Box>
                 </CardContent>
               </Card>
@@ -206,7 +215,6 @@ export default function Sandboxes() {
           ))}
         </Grid>
       ) : filtered.length === 0 ? (
-        // Empty state
         <Box
           sx={{
             textAlign: 'center',
@@ -217,8 +225,8 @@ export default function Sandboxes() {
             sx={{
               width: 64,
               height: 64,
-              borderRadius: '50%',
-              bgcolor: alpha(GOLD, 0.08),
+              borderRadius: '20px',
+              bgcolor: alpha(LIME, 0.08),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -226,7 +234,7 @@ export default function Sandboxes() {
               mb: 2,
             }}
           >
-            <TerminalRounded sx={{ fontSize: 32, color: alpha(GOLD, 0.4) }} />
+            <TerminalRounded sx={{ fontSize: 32, color: alpha(LIME, 0.4) }} />
           </Box>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             {search || statusFilter !== 'all'
@@ -243,15 +251,15 @@ export default function Sandboxes() {
               variant="contained"
               startIcon={<AddRounded />}
               onClick={() => navigate('/create')}
+              sx={{ borderRadius: '14px' }}
             >
               Create Sandbox
             </Button>
           )}
         </Box>
       ) : (
-        // Sandbox cards grid
         <motion.div variants={containerVariants} initial="hidden" animate="visible">
-          <Grid container spacing={3}>
+          <Grid container spacing={2.5}>
             <AnimatePresence mode="popLayout">
               {filtered.map((sb) => {
                 const statusColor = getStatusColor(sb.status);
@@ -267,10 +275,6 @@ export default function Sandboxes() {
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        '&:hover': {
-                          borderColor: alpha(GOLD, 0.2),
-                          boxShadow: `0 0 30px ${alpha(GOLD, 0.05)}`,
-                        },
                       }}
                     >
                       <CardContent
@@ -360,6 +364,7 @@ export default function Sandboxes() {
                               fontWeight: 600,
                               textTransform: 'capitalize',
                               border: 'none',
+                              borderRadius: '8px',
                             }}
                           />
                         </Box>
@@ -374,7 +379,7 @@ export default function Sandboxes() {
                             size="small"
                             startIcon={<TerminalRounded />}
                             onClick={() => navigate(`/sandbox/${sb.id}`)}
-                            sx={{ fontSize: '0.8rem' }}
+                            sx={{ fontSize: '0.8rem', borderRadius: '12px' }}
                           >
                             Terminal
                           </Button>
@@ -387,6 +392,7 @@ export default function Sandboxes() {
                             sx={{
                               color: '#EF4444',
                               fontSize: '0.8rem',
+                              borderRadius: '12px',
                               '&:hover': {
                                 bgcolor: alpha('#EF4444', 0.08),
                               },
@@ -427,6 +433,7 @@ export default function Sandboxes() {
           <Button
             onClick={() => setDestroyTarget(null)}
             disabled={destroying}
+            sx={{ borderRadius: '12px' }}
           >
             Cancel
           </Button>
@@ -437,6 +444,7 @@ export default function Sandboxes() {
             sx={{
               bgcolor: '#EF4444',
               color: '#fff',
+              borderRadius: '12px',
               '&:hover': { bgcolor: '#DC2626' },
             }}
           >

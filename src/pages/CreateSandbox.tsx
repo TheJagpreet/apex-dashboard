@@ -8,8 +8,6 @@ import {
   Button,
   IconButton,
   Collapse,
-  Snackbar,
-  Alert,
   CircularProgress,
   Divider,
 } from '@mui/material';
@@ -24,23 +22,27 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { createSandbox } from '../api/client';
+import { useToast } from '../hooks/useToast';
 
 const MotionCard = motion(Card);
+
+const LIME = '#C8E64A';
 
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 export default function CreateSandbox() {
   const navigate = useNavigate();
+  const { showError } = useToast();
 
   // Form state
   const [image, setImage] = useState('');
@@ -57,13 +59,6 @@ export default function CreateSandbox() {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
-
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({ open: false, message: '', severity: 'success' });
 
   const handleAddEnvVar = () => setEnvVars((prev) => [...prev, '']);
   const handleRemoveEnvVar = (index: number) =>
@@ -105,18 +100,13 @@ export default function CreateSandbox() {
       const filteredMounts = mounts.filter((v) => v.trim());
       if (filteredMounts.length > 0) payload.mounts = filteredMounts;
 
-      const response = await createSandbox(payload);
-      setSnackbar({
-        open: true,
-        message: `Sandbox created successfully — ID: ${response.sandbox_id}`,
-        severity: 'success',
-      });
+      await createSandbox(payload);
 
-      globalThis.setTimeout(() => navigate('/sandboxes'), 1500);
+      globalThis.setTimeout(() => navigate('/sandboxes'), 500);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'An unexpected error occurred';
-      setSnackbar({ open: true, message, severity: 'error' });
+      showError(message);
     } finally {
       setLoading(false);
     }
@@ -145,7 +135,10 @@ export default function CreateSandbox() {
         transition={{ duration: 0.4, ease: 'easeOut' as const }}
       >
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h3" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h3"
+            sx={{ fontWeight: 700, fontSize: { xs: '1.8rem', md: '2.2rem' } }}
+          >
             Create Sandbox
           </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary', mt: 0.5 }}>
@@ -157,12 +150,12 @@ export default function CreateSandbox() {
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
         <form onSubmit={handleSubmit} noValidate>
           {/* Main Form Card */}
-          <MotionCard variants={itemVariants} sx={{ mb: 3 }}>
+          <MotionCard variants={itemVariants} sx={{ mb: 2.5 }}>
             <CardContent sx={{ p: { xs: 3, md: 4 } }}>
               {/* Image Field (required) */}
               <Typography
                 variant="subtitle2"
-                sx={{ color: '#ECD06F', fontWeight: 700, mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}
+                sx={{ color: LIME, fontWeight: 700, mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em' }}
               >
                 Image *
               </Typography>
@@ -315,7 +308,7 @@ export default function CreateSandbox() {
                       startIcon={<AddRounded />}
                       onClick={handleAddEnvVar}
                       size="small"
-                      sx={{ color: '#ECD06F', textTransform: 'none', fontWeight: 600 }}
+                      sx={{ color: LIME, textTransform: 'none', fontWeight: 600 }}
                     >
                       Add Variable
                     </Button>
@@ -349,7 +342,7 @@ export default function CreateSandbox() {
                       startIcon={<AddRounded />}
                       onClick={handleAddMount}
                       size="small"
-                      sx={{ color: '#ECD06F', textTransform: 'none', fontWeight: 600 }}
+                      sx={{ color: LIME, textTransform: 'none', fontWeight: 600 }}
                     >
                       Add Mount
                     </Button>
@@ -371,7 +364,7 @@ export default function CreateSandbox() {
             >
               <Button
                 onClick={() => navigate(-1)}
-                sx={{ color: 'text.secondary', textTransform: 'none', fontWeight: 600 }}
+                sx={{ color: 'text.secondary', textTransform: 'none', fontWeight: 600, borderRadius: '12px' }}
               >
                 Cancel
               </Button>
@@ -386,6 +379,7 @@ export default function CreateSandbox() {
                     <RocketLaunchRounded />
                   )
                 }
+                sx={{ borderRadius: '14px' }}
               >
                 {loading ? 'Creating…' : 'Create Sandbox'}
               </Button>
@@ -393,23 +387,6 @@ export default function CreateSandbox() {
           </MotionCard>
         </form>
       </motion.div>
-
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }

@@ -29,16 +29,18 @@ import { motion } from 'framer-motion';
 
 const MotionCard = motion(Card);
 
+const LIME = '#C8E64A';
+
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' as const } },
 };
 
 function getStatusColor(status: string) {
@@ -66,7 +68,7 @@ export default function Dashboard() {
       label: 'Total Sandboxes',
       value: sandboxes.length,
       icon: <DnsRounded />,
-      color: '#ECD06F',
+      color: LIME,
     },
     {
       label: 'Running',
@@ -84,10 +86,16 @@ export default function Dashboard() {
 
   return (
     <Box>
-      {/* Header */}
+      {/* Greeting Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" sx={{ fontWeight: 700 }}>
-          Dashboard
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 700,
+            fontSize: { xs: '1.8rem', md: '2.2rem' },
+          }}
+        >
+          Hello, <Box component="span" sx={{ color: LIME }}>Developer</Box>
         </Typography>
         <Typography variant="body1" sx={{ color: 'text.secondary', mt: 0.5 }}>
           Manage your sandbox environments
@@ -96,20 +104,31 @@ export default function Dashboard() {
 
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
         {/* Stats Row */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
           {stats.map((stat) => (
             <Grid size={{ xs: 12, md: 4 }} key={stat.label}>
-              <MotionCard variants={itemVariants}>
+              <MotionCard
+                variants={itemVariants}
+                sx={{
+                  borderRadius: '24px',
+                  background: alpha(stat.color, 0.06),
+                  border: `1px solid ${alpha(stat.color, 0.1)}`,
+                  '&:hover': {
+                    borderColor: alpha(stat.color, 0.2),
+                    background: alpha(stat.color, 0.08),
+                  },
+                }}
+              >
                 <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2.5, py: 3 }}>
                   <Box
                     sx={{
                       width: 52,
                       height: 52,
-                      borderRadius: '50%',
+                      borderRadius: '16px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      bgcolor: alpha(stat.color, 0.12),
+                      bgcolor: alpha(stat.color, 0.15),
                       color: stat.color,
                       flexShrink: 0,
                     }}
@@ -120,7 +139,10 @@ export default function Dashboard() {
                     {sandboxesLoading ? (
                       <Skeleton width={48} height={40} />
                     ) : (
-                      <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                      <Typography
+                        variant="h4"
+                        sx={{ fontWeight: 700, lineHeight: 1, fontSize: '2rem' }}
+                      >
                         {stat.value}
                       </Typography>
                     )}
@@ -134,42 +156,98 @@ export default function Dashboard() {
           ))}
         </Grid>
 
-        {/* Server Health */}
-        <MotionCard variants={itemVariants} sx={{ mb: 3 }}>
-          <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {healthLoading ? (
-              <Skeleton variant="circular" width={12} height={12} />
-            ) : (
-              <FiberManualRecord
-                sx={{
-                  fontSize: 12,
-                  color: healthy ? '#4ADE80' : '#EF4444',
-                  animation: 'pulse 2s ease-in-out infinite',
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.4 },
-                  },
-                }}
-              />
-            )}
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {healthLoading ? (
-                <Skeleton width={160} />
-              ) : (
-                <>
-                  <Box component="span" sx={{ color: 'text.primary', fontWeight: 600, mr: 1 }}>
-                    {health?.service ?? 'API Server'}
+        {/* Two-column layout: Health + Quick Actions */}
+        <Grid container spacing={2.5} sx={{ mb: 2.5 }}>
+          {/* Server Health */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <MotionCard variants={itemVariants} sx={{ height: '100%' }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 2.5 }}>
+                {healthLoading ? (
+                  <Skeleton variant="circular" width={12} height={12} />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: healthy
+                        ? alpha('#4ADE80', 0.12)
+                        : alpha('#EF4444', 0.12),
+                    }}
+                  >
+                    <FiberManualRecord
+                      sx={{
+                        fontSize: 14,
+                        color: healthy ? '#4ADE80' : '#EF4444',
+                        animation: 'pulse 2s ease-in-out infinite',
+                        '@keyframes pulse': {
+                          '0%, 100%': { opacity: 1 },
+                          '50%': { opacity: 0.4 },
+                        },
+                      }}
+                    />
                   </Box>
-                  {healthy ? 'Connected' : 'Disconnected'}
-                </>
-              )}
-            </Typography>
-          </CardContent>
-        </MotionCard>
+                )}
+                <Box>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {healthLoading ? (
+                      <Skeleton width={160} />
+                    ) : (
+                      <>
+                        <Box
+                          component="span"
+                          sx={{ color: 'text.primary', fontWeight: 600, mr: 1 }}
+                        >
+                          {health?.service ?? 'API Server'}
+                        </Box>
+                        {healthy ? 'Connected' : 'Disconnected'}
+                      </>
+                    )}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </MotionCard>
+          </Grid>
+
+          {/* Quick Actions */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <MotionCard variants={itemVariants} sx={{ height: '100%' }}>
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  py: 2.5,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <Button
+                  variant="contained"
+                  startIcon={<AddRounded />}
+                  onClick={() => navigate('/create')}
+                  sx={{ borderRadius: '14px' }}
+                >
+                  Create Sandbox
+                </Button>
+                <Button
+                  variant="outlined"
+                  endIcon={<ArrowForwardRounded />}
+                  onClick={() => navigate('/sandboxes')}
+                  sx={{ borderRadius: '14px' }}
+                >
+                  View All
+                </Button>
+              </CardContent>
+            </MotionCard>
+          </Grid>
+        </Grid>
 
         {/* Recent Sandboxes */}
-        <MotionCard variants={itemVariants} sx={{ mb: 3 }}>
-          <CardContent>
+        <MotionCard variants={itemVariants}>
+          <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
               Recent Sandboxes
             </Typography>
@@ -177,7 +255,7 @@ export default function Dashboard() {
             {sandboxesLoading ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} height={40} />
+                  <Skeleton key={i} height={40} sx={{ borderRadius: '10px' }} />
                 ))}
               </Box>
             ) : recentSandboxes.length === 0 ? (
@@ -194,7 +272,12 @@ export default function Dashboard() {
                 </Typography>
               </Box>
             ) : (
-              <TableContainer>
+              <TableContainer
+                sx={{
+                  borderRadius: '16px',
+                  bgcolor: alpha('#FFFFFF', 0.02),
+                }}
+              >
                 <Table size="small">
                   <TableHead>
                     <TableRow>
@@ -208,7 +291,12 @@ export default function Dashboard() {
                     {recentSandboxes.map((sb) => {
                       const statusColor = getStatusColor(sb.status);
                       return (
-                        <TableRow key={sb.id} hover>
+                        <TableRow
+                          key={sb.id}
+                          hover
+                          onClick={() => navigate(`/sandbox/${sb.id}`)}
+                          sx={{ cursor: 'pointer' }}
+                        >
                           <TableCell sx={{ fontWeight: 500 }}>{sb.name}</TableCell>
                           <TableCell sx={{ fontFamily: '"Space Mono", monospace' }}>
                             {sb.image}
@@ -236,31 +324,6 @@ export default function Dashboard() {
                 </Table>
               </TableContainer>
             )}
-          </CardContent>
-        </MotionCard>
-
-        {/* Quick Actions */}
-        <MotionCard variants={itemVariants}>
-          <CardContent>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-              Quick Actions
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <Button
-                variant="contained"
-                startIcon={<AddRounded />}
-                onClick={() => navigate('/create')}
-              >
-                Create Sandbox
-              </Button>
-              <Button
-                variant="outlined"
-                endIcon={<ArrowForwardRounded />}
-                onClick={() => navigate('/sandboxes')}
-              >
-                View All
-              </Button>
-            </Box>
           </CardContent>
         </MotionCard>
       </motion.div>

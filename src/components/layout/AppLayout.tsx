@@ -1,24 +1,23 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, IconButton, Typography, Tooltip } from '@mui/material';
+import { Box, Typography, IconButton, InputBase } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
   DashboardRounded,
   DnsRounded,
   AddCircleRounded,
-  ChevronLeftRounded,
-  ChevronRightRounded,
+  SearchRounded,
+  NotificationsNoneRounded,
   FiberManualRecord,
 } from '@mui/icons-material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useHealth } from '../../hooks/useSandboxes';
+import { useToast } from '../../hooks/useToast';
 
-const SIDEBAR_WIDTH = 240;
-const SIDEBAR_COLLAPSED_WIDTH = 72;
-const GOLD = '#ECD06F';
-const SIDEBAR_BG = '#0A0A0A';
-const SIDEBAR_BORDER = '#1E1E1E';
+const LIME = '#C8E64A';
+const NAV_BG = '#242424';
+const NAV_BORDER = '#2E2E2E';
 
 interface NavItem {
   label: string;
@@ -27,9 +26,9 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', icon: <DashboardRounded />, path: '/' },
-  { label: 'Sandboxes', icon: <DnsRounded />, path: '/sandboxes' },
-  { label: 'Create New', icon: <AddCircleRounded />, path: '/create' },
+  { label: 'Dashboard', icon: <DashboardRounded sx={{ fontSize: 18 }} />, path: '/' },
+  { label: 'Sandboxes', icon: <DnsRounded sx={{ fontSize: 18 }} />, path: '/sandboxes' },
+  { label: 'Create New', icon: <AddCircleRounded sx={{ fontSize: 18 }} />, path: '/create' },
 ];
 
 interface AppLayoutProps {
@@ -37,249 +36,220 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { healthy, loading: healthLoading } = useHealth();
+  const { showServerDown, clearServerDown } = useToast();
 
-  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
+  useEffect(() => {
+    if (healthLoading) return;
+    if (!healthy) {
+      showServerDown();
+    } else {
+      clearServerDown();
+    }
+  }, [healthy, healthLoading, showServerDown, clearServerDown]);
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar */}
-      <motion.nav
-        animate={{ width: sidebarWidth }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        style={{
-          position: 'fixed',
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Top Navigation Bar */}
+      <Box
+        component="nav"
+        sx={{
+          position: 'sticky',
           top: 0,
-          left: 0,
-          height: '100vh',
-          background: SIDEBAR_BG,
-          borderRight: `1px solid ${SIDEBAR_BORDER}`,
-          display: 'flex',
-          flexDirection: 'column',
           zIndex: 1200,
-          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: { xs: 2, sm: 3, md: 4 },
+          py: 1.5,
+          bgcolor: alpha(NAV_BG, 0.8),
+          backdropFilter: 'blur(20px)',
+          borderBottom: `1px solid ${NAV_BORDER}`,
         }}
       >
-        {/* Logo / Brand */}
+        {/* Left: Logo */}
         <Box
           sx={{
-            px: collapsed ? 1.5 : 3,
-            pt: 3,
-            pb: 2,
             display: 'flex',
             alignItems: 'center',
             gap: 1.5,
-            minHeight: 72,
+            cursor: 'pointer',
+            flexShrink: 0,
           }}
+          onClick={() => navigate('/')}
         >
           <Box
             sx={{
-              color: GOLD,
-              fontSize: 22,
+              color: LIME,
+              fontSize: 20,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              width: 36,
-              height: 36,
             }}
           >
             ◆
           </Box>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Typography
-                  sx={{
-                    fontWeight: 800,
-                    fontSize: '1.35rem',
-                    color: GOLD,
-                    letterSpacing: '0.12em',
-                    lineHeight: 1,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  APEX
-                </Typography>
-                <Typography
-                  sx={{
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: '0.55rem',
-                    color: alpha('#FFFFFF', 0.35),
-                    letterSpacing: '0.18em',
-                    mt: 0.5,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  SANDBOX MANAGER
-                </Typography>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <Typography
+            sx={{
+              fontWeight: 800,
+              fontSize: '1.1rem',
+              color: '#FFFFFF',
+              letterSpacing: '0.06em',
+              lineHeight: 1,
+            }}
+          >
+            Apex
+          </Typography>
         </Box>
 
-        {/* Divider */}
+        {/* Center: Pill Navigation */}
         <Box
           sx={{
-            mx: 2,
-            mb: 1,
-            borderBottom: `1px solid ${alpha('#FFFFFF', 0.06)}`,
+            display: { xs: 'none', sm: 'flex' },
+            alignItems: 'center',
+            gap: 0.5,
+            bgcolor: alpha('#FFFFFF', 0.05),
+            borderRadius: '16px',
+            p: 0.5,
+            border: `1px solid ${alpha('#FFFFFF', 0.06)}`,
           }}
-        />
-
-        {/* Navigation */}
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.5, pt: 1 }}>
+        >
           {navItems.map((item) => {
             const active = location.pathname === item.path;
             return (
-              <Tooltip
+              <motion.div
                 key={item.path}
-                title={collapsed ? item.label : ''}
-                placement="right"
-                arrow
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <Box
                   onClick={() => navigate(item.path)}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1.5,
-                    px: collapsed ? 1.5 : 2,
-                    py: 1.25,
+                    gap: 0.75,
+                    px: 2,
+                    py: 0.8,
                     borderRadius: '12px',
                     cursor: 'pointer',
-                    position: 'relative',
-                    transition: 'background 0.2s ease',
-                    bgcolor: active ? alpha(GOLD, 0.08) : 'transparent',
-                    borderLeft: active ? `3px solid ${GOLD}` : '3px solid transparent',
+                    transition: 'all 0.2s ease',
+                    bgcolor: active ? alpha('#FFFFFF', 0.1) : 'transparent',
+                    color: active ? '#FFFFFF' : alpha('#FFFFFF', 0.5),
                     '&:hover': {
-                      bgcolor: active ? alpha(GOLD, 0.12) : alpha('#FFFFFF', 0.04),
+                      bgcolor: active ? alpha('#FFFFFF', 0.12) : alpha('#FFFFFF', 0.05),
+                      color: active ? '#FFFFFF' : alpha('#FFFFFF', 0.7),
                     },
-                    justifyContent: collapsed ? 'center' : 'flex-start',
                   }}
                 >
-                  <Box
+                  {item.icon}
+                  <Typography
                     sx={{
-                      color: active ? GOLD : alpha('#FFFFFF', 0.5),
-                      display: 'flex',
-                      alignItems: 'center',
-                      fontSize: 22,
-                      flexShrink: 0,
-                      transition: 'color 0.2s ease',
+                      fontSize: '0.82rem',
+                      fontWeight: active ? 600 : 500,
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {item.icon}
-                  </Box>
-                  <AnimatePresence>
-                    {!collapsed && (
-                      <motion.span
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: 'auto' }}
-                        exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                        style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
-                      >
-                        <Typography
-                          sx={{
-                            fontSize: '0.85rem',
-                            fontWeight: active ? 600 : 400,
-                            color: active ? GOLD : alpha('#FFFFFF', 0.7),
-                            letterSpacing: '0.02em',
-                          }}
-                        >
-                          {item.label}
-                        </Typography>
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
+                    {item.label}
+                  </Typography>
                 </Box>
-              </Tooltip>
+              </motion.div>
             );
           })}
         </Box>
 
-        {/* Bottom Section */}
-        <Box sx={{ px: collapsed ? 1 : 2, pb: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          {/* Health Indicator */}
+        {/* Right: Search + Status + Notifications */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          {/* Search */}
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              alignItems: 'center',
+              gap: 1,
+              bgcolor: alpha('#FFFFFF', 0.05),
+              borderRadius: '12px',
+              px: 1.5,
+              py: 0.5,
+              border: `1px solid ${alpha('#FFFFFF', 0.06)}`,
+              minWidth: 160,
+            }}
+          >
+            <SearchRounded sx={{ color: alpha('#FFFFFF', 0.4), fontSize: 18 }} />
+            <InputBase
+              placeholder="Search…"
+              sx={{
+                fontSize: '0.82rem',
+                color: '#FFFFFF',
+                '& input::placeholder': {
+                  color: alpha('#FFFFFF', 0.4),
+                  opacity: 1,
+                },
+              }}
+            />
+          </Box>
+
+          {/* Server Health */}
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              gap: 1,
-              px: collapsed ? 1.5 : 2,
-              py: 1,
+              gap: 0.75,
+              px: 1.5,
+              py: 0.6,
               borderRadius: '10px',
-              bgcolor: alpha('#FFFFFF', 0.03),
-              justifyContent: collapsed ? 'center' : 'flex-start',
+              bgcolor: alpha('#FFFFFF', 0.04),
             }}
           >
             <FiberManualRecord
               sx={{
-                fontSize: 10,
-                color: healthLoading ? alpha('#FFFFFF', 0.3) : healthy ? '#4CAF50' : '#F44336',
-                flexShrink: 0,
+                fontSize: 8,
+                color: healthLoading
+                  ? alpha('#FFFFFF', 0.3)
+                  : healthy
+                    ? '#4ADE80'
+                    : '#EF4444',
+                ...((!healthLoading && !healthy) && {
+                  animation: 'pulse 2s ease-in-out infinite',
+                  '@keyframes pulse': {
+                    '0%, 100%': { opacity: 1 },
+                    '50%': { opacity: 0.3 },
+                  },
+                }),
               }}
             />
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: '0.75rem',
-                      color: alpha('#FFFFFF', 0.5),
-                      letterSpacing: '0.03em',
-                    }}
-                  >
-                    Server
-                  </Typography>
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </Box>
-
-          {/* Collapse Toggle */}
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <IconButton
-              onClick={() => setCollapsed((prev) => !prev)}
-              size="small"
+            <Typography
               sx={{
-                color: alpha('#FFFFFF', 0.4),
-                '&:hover': {
-                  color: GOLD,
-                  bgcolor: alpha(GOLD, 0.08),
-                },
-                transition: 'all 0.2s ease',
+                fontSize: '0.72rem',
+                color: alpha('#FFFFFF', 0.5),
+                display: { xs: 'none', sm: 'block' },
               }}
             >
-              {collapsed ? <ChevronRightRounded /> : <ChevronLeftRounded />}
-            </IconButton>
+              {healthLoading ? '…' : healthy ? 'Online' : 'Offline'}
+            </Typography>
           </Box>
+
+          {/* Notifications icon */}
+          <IconButton
+            size="small"
+            sx={{
+              color: alpha('#FFFFFF', 0.5),
+              '&:hover': { color: '#FFFFFF', bgcolor: alpha('#FFFFFF', 0.06) },
+            }}
+          >
+            <NotificationsNoneRounded sx={{ fontSize: 20 }} />
+          </IconButton>
         </Box>
-      </motion.nav>
+      </Box>
 
       {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          ml: `${sidebarWidth}px`,
-          transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          minHeight: '100vh',
           p: { xs: 2, sm: 3, md: 4 },
+          maxWidth: 1400,
+          mx: 'auto',
+          width: '100%',
         }}
       >
         {children}

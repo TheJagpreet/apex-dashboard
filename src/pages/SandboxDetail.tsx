@@ -13,8 +13,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  Snackbar,
-  Alert,
   CircularProgress,
   Divider,
 } from '@mui/material';
@@ -37,22 +35,23 @@ import {
   copyFromSandbox,
   destroySandbox,
 } from '../api/client';
+import { useToast } from '../hooks/useToast';
 
 const MotionCard = motion(Card);
 
-const GOLD = '#ECD06F';
+const LIME = '#C8E64A';
 const RED = '#EF4444';
 
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 } as const;
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 function getStatusColor(status: string) {
@@ -83,7 +82,7 @@ const fieldSx = {
 };
 
 const sectionLabelSx = {
-  color: GOLD,
+  color: LIME,
   fontWeight: 700,
   mb: 1.5,
   textTransform: 'uppercase' as const,
@@ -94,6 +93,7 @@ export default function SandboxDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { status, loading: statusLoading } = useSandboxStatus(id);
+  const { showError } = useToast();
 
   // Terminal state
   const [commandInput, setCommandInput] = useState('');
@@ -111,13 +111,6 @@ export default function SandboxDetail() {
   // Destroy state
   const [destroyDialogOpen, setDestroyDialogOpen] = useState(false);
   const [destroying, setDestroying] = useState(false);
-
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({ open: false, message: '', severity: 'success' });
 
   // Auto-scroll terminal output
   useEffect(() => {
@@ -156,10 +149,11 @@ export default function SandboxDetail() {
         },
       ]);
       setCommandInput('');
+      showError(message);
     } finally {
       setExecLoading(false);
     }
-  }, [commandInput, id]);
+  }, [commandInput, id, showError]);
 
   const handleCopyTo = useCallback(async () => {
     if (!id || !copyToHostPath.trim() || !copyToContainerPath.trim()) return;
@@ -169,17 +163,16 @@ export default function SandboxDetail() {
         host_path: copyToHostPath.trim(),
         container_path: copyToContainerPath.trim(),
       });
-      setSnackbar({ open: true, message: 'Copied to sandbox successfully', severity: 'success' });
       setCopyToHostPath('');
       setCopyToContainerPath('');
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Failed to copy to sandbox';
-      setSnackbar({ open: true, message, severity: 'error' });
+      showError(message);
     } finally {
       setCopyLoading(false);
     }
-  }, [id, copyToHostPath, copyToContainerPath]);
+  }, [id, copyToHostPath, copyToContainerPath, showError]);
 
   const handleCopyFrom = useCallback(async () => {
     if (!id || !copyFromContainerPath.trim() || !copyFromHostPath.trim()) return;
@@ -189,17 +182,16 @@ export default function SandboxDetail() {
         container_path: copyFromContainerPath.trim(),
         host_path: copyFromHostPath.trim(),
       });
-      setSnackbar({ open: true, message: 'Copied from sandbox successfully', severity: 'success' });
       setCopyFromContainerPath('');
       setCopyFromHostPath('');
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Failed to copy from sandbox';
-      setSnackbar({ open: true, message, severity: 'error' });
+      showError(message);
     } finally {
       setCopyLoading(false);
     }
-  }, [id, copyFromContainerPath, copyFromHostPath]);
+  }, [id, copyFromContainerPath, copyFromHostPath, showError]);
 
   const handleDestroy = useCallback(async () => {
     if (!id) return;
@@ -210,11 +202,11 @@ export default function SandboxDetail() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'Failed to destroy sandbox';
-      setSnackbar({ open: true, message, severity: 'error' });
+      showError(message);
       setDestroying(false);
       setDestroyDialogOpen(false);
     }
-  }, [id, navigate]);
+  }, [id, navigate, showError]);
 
   const statusColor = getStatusColor(status ?? 'unknown');
 
@@ -245,7 +237,10 @@ export default function SandboxDetail() {
               <ArrowBackRounded />
             </IconButton>
             <Box sx={{ minWidth: 0 }}>
-              <Typography variant="h3" sx={{ fontWeight: 700 }}>
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 700, fontSize: { xs: '1.8rem', md: '2.2rem' } }}
+              >
                 Sandbox
               </Typography>
               <Typography
@@ -264,7 +259,7 @@ export default function SandboxDetail() {
             </Box>
           </Box>
           {statusLoading ? (
-            <CircularProgress size={20} sx={{ color: GOLD }} />
+            <CircularProgress size={20} sx={{ color: LIME }} />
           ) : (
             <Chip
               label={status ?? 'unknown'}
@@ -291,6 +286,7 @@ export default function SandboxDetail() {
                 fontWeight: 600,
                 textTransform: 'capitalize',
                 border: 'none',
+                borderRadius: '10px',
                 flexShrink: 0,
               }}
             />
@@ -300,7 +296,7 @@ export default function SandboxDetail() {
 
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
         {/* Info Card */}
-        <MotionCard variants={itemVariants} sx={{ mb: 3 }}>
+        <MotionCard variants={itemVariants} sx={{ mb: 2.5 }}>
           <CardContent sx={{ p: { xs: 3, md: 4 } }}>
             <Typography variant="subtitle2" sx={sectionLabelSx}>
               Sandbox Info
@@ -367,15 +363,15 @@ export default function SandboxDetail() {
         <MotionCard
           variants={itemVariants}
           sx={{
-            mb: 3,
-            bgcolor: '#0A0A0A',
+            mb: 2.5,
+            bgcolor: '#1E1E1E',
             border: '1px solid',
             borderColor: alpha('#FFFFFF', 0.08),
           }}
         >
           <CardContent sx={{ p: { xs: 2, md: 3 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <TerminalRounded sx={{ color: GOLD, fontSize: 20 }} />
+              <TerminalRounded sx={{ color: LIME, fontSize: 20 }} />
               <Typography variant="subtitle2" sx={{ ...sectionLabelSx, mb: 0 }}>
                 Terminal
               </Typography>
@@ -388,8 +384,8 @@ export default function SandboxDetail() {
                 minHeight: 300,
                 maxHeight: 500,
                 overflowY: 'auto',
-                bgcolor: '#000',
-                borderRadius: 1,
+                bgcolor: '#141414',
+                borderRadius: '16px',
                 p: 2,
                 mb: 2,
                 fontFamily: monoFont,
@@ -423,13 +419,13 @@ export default function SandboxDetail() {
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       <Typography
                         component="span"
-                        sx={{ fontFamily: monoFont, fontSize: '0.8rem', color: GOLD, whiteSpace: 'pre-wrap' }}
+                        sx={{ fontFamily: monoFont, fontSize: '0.8rem', color: LIME, whiteSpace: 'pre-wrap' }}
                       >
                         $
                       </Typography>
                       <Typography
                         component="span"
-                        sx={{ fontFamily: monoFont, fontSize: '0.8rem', color: GOLD, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}
+                        sx={{ fontFamily: monoFont, fontSize: '0.8rem', color: LIME, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}
                       >
                         {entry.command}
                       </Typography>
@@ -481,7 +477,7 @@ export default function SandboxDetail() {
               )}
               {execLoading && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                  <CircularProgress size={14} sx={{ color: GOLD }} />
+                  <CircularProgress size={14} sx={{ color: LIME }} />
                   <Typography
                     sx={{
                       fontFamily: monoFont,
@@ -514,7 +510,7 @@ export default function SandboxDetail() {
                   '& .MuiOutlinedInput-root': {
                     fontFamily: monoFont,
                     fontSize: '0.875rem',
-                    bgcolor: '#000',
+                    bgcolor: '#141414',
                   },
                 }}
               />
@@ -524,10 +520,11 @@ export default function SandboxDetail() {
                 disabled={execLoading || !commandInput.trim()}
                 sx={{
                   minWidth: 48,
-                  bgcolor: GOLD,
+                  borderRadius: '14px',
+                  bgcolor: LIME,
                   color: '#000',
-                  '&:hover': { bgcolor: alpha(GOLD, 0.85) },
-                  '&.Mui-disabled': { bgcolor: alpha(GOLD, 0.2), color: alpha('#000', 0.4) },
+                  '&:hover': { bgcolor: alpha(LIME, 0.85) },
+                  '&.Mui-disabled': { bgcolor: alpha(LIME, 0.2), color: alpha('#000', 0.4) },
                 }}
               >
                 <SendRounded sx={{ fontSize: 18 }} />
@@ -537,10 +534,10 @@ export default function SandboxDetail() {
         </MotionCard>
 
         {/* File Operations Card */}
-        <MotionCard variants={itemVariants} sx={{ mb: 3 }}>
+        <MotionCard variants={itemVariants} sx={{ mb: 2.5 }}>
           <CardContent sx={{ p: { xs: 3, md: 4 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-              <FileCopyRounded sx={{ color: GOLD, fontSize: 20 }} />
+              <FileCopyRounded sx={{ color: LIME, fontSize: 20 }} />
               <Typography variant="subtitle2" sx={{ ...sectionLabelSx, mb: 0 }}>
                 File Operations
               </Typography>
@@ -574,7 +571,7 @@ export default function SandboxDetail() {
                   onClick={handleCopyTo}
                   disabled={copyLoading || !copyToHostPath.trim() || !copyToContainerPath.trim()}
                   startIcon={copyLoading ? <CircularProgress size={16} /> : <ContentCopyRounded />}
-                  sx={{ flexShrink: 0, height: 40 }}
+                  sx={{ flexShrink: 0, height: 40, borderRadius: '12px' }}
                 >
                   Copy
                 </Button>
@@ -611,7 +608,7 @@ export default function SandboxDetail() {
                   onClick={handleCopyFrom}
                   disabled={copyLoading || !copyFromContainerPath.trim() || !copyFromHostPath.trim()}
                   startIcon={copyLoading ? <CircularProgress size={16} /> : <ContentCopyRounded />}
-                  sx={{ flexShrink: 0, height: 40 }}
+                  sx={{ flexShrink: 0, height: 40, borderRadius: '12px' }}
                 >
                   Copy
                 </Button>
@@ -624,7 +621,7 @@ export default function SandboxDetail() {
         <MotionCard
           variants={itemVariants}
           sx={{
-            mb: 3,
+            mb: 2.5,
             border: '1px solid',
             borderColor: alpha(RED, 0.3),
           }}
@@ -651,6 +648,7 @@ export default function SandboxDetail() {
               sx={{
                 bgcolor: RED,
                 color: '#fff',
+                borderRadius: '14px',
                 '&:hover': { bgcolor: '#DC2626' },
               }}
             >
@@ -679,7 +677,11 @@ export default function SandboxDetail() {
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDestroyDialogOpen(false)} disabled={destroying}>
+          <Button
+            onClick={() => setDestroyDialogOpen(false)}
+            disabled={destroying}
+            sx={{ borderRadius: '12px' }}
+          >
             Cancel
           </Button>
           <Button
@@ -690,6 +692,7 @@ export default function SandboxDetail() {
             sx={{
               bgcolor: RED,
               color: '#fff',
+              borderRadius: '12px',
               '&:hover': { bgcolor: '#DC2626' },
             }}
           >
@@ -697,23 +700,6 @@ export default function SandboxDetail() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }
