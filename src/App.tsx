@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { theme } from './theme';
+import { ToastProvider } from './contexts/ToastContext';
 import AppLayout from './components/layout/AppLayout';
 import Dashboard from './pages/Dashboard';
 import Sandboxes from './pages/Sandboxes';
@@ -20,16 +21,18 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
-        <AppLayout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/sandboxes" element={<Sandboxes />} />
-            <Route path="/create" element={<CreateSandbox />} />
-            <Route path="/sandbox/:id" element={<SandboxDetail />} />
-          </Routes>
-        </AppLayout>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <AppLayout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/sandboxes" element={<Sandboxes />} />
+              <Route path="/create" element={<CreateSandbox />} />
+              <Route path="/sandbox/:id" element={<SandboxDetail />} />
+            </Routes>
+          </AppLayout>
+        </BrowserRouter>
+      </ToastProvider>
     </ThemeProvider>
   );
 }
