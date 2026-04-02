@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# Apex Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React dashboard for managing [apex-venv](https://github.com/TheJagpreet/apex-venv) sandbox environments.
 
-Currently, two official plugins are available:
+![Black & Gold](https://img.shields.io/badge/theme-Black%20%26%20Gold-ECD06F?style=flat-square&labelColor=000000)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- **Dashboard Overview** — Live stats, server health, recent sandboxes at a glance
+- **Sandbox Management** — List, search, filter, create, and destroy sandboxes
+- **Built-in Terminal** — Execute commands inside sandboxes with color-coded output
+- **File Operations** — Copy files to/from sandboxes
+- **Real-time Status** — Polling-based live status updates for all sandboxes
+- **Modern UI** — Material You design with dark theme, animations, and responsive layout
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- **React 19** + **TypeScript** + **Vite**
+- **MUI v7** (Material UI) with custom dark theme
+- **Framer Motion** for animations
+- **Axios** for API communication
+- **React Router** for SPA navigation
+- **DM Sans** + **Space Mono** typography
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js 18+
+- [apex-venv server](https://github.com/TheJagpreet/apex-venv) running on `localhost:8080`
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Install & Run
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Build for Production
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+npm run build
+npm run preview
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Configuration
+
+Set the API base URL via environment variable:
+
+```bash
+VITE_API_BASE_URL=http://your-server:8080 npm run dev
+```
+
+## Project Structure
+
+```
+src/
+├── api/            # API client and TypeScript types
+├── components/
+│   └── layout/     # AppLayout with sidebar navigation
+├── hooks/          # Custom React hooks for data fetching
+├── pages/          # Dashboard, Sandboxes, CreateSandbox, SandboxDetail
+└── theme/          # MUI theme configuration (Black #000 + Gold #ECD06F)
 ```
